@@ -1,0 +1,1357 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Attendance Dashboard | Face Recognition System</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600&family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-primary: #0a0e14;
+            --bg-secondary: #121820;
+            --bg-tertiary: #1a2130;
+            --accent-primary: #00ff9d;
+            --accent-secondary: #00c8ff;
+            --accent-warning: #ffb800;
+            --accent-error: #ff4d6d;
+            --accent-purple: #a855f7;
+            --text-primary: #e8eaed;
+            --text-secondary: #8b949e;
+            --text-muted: #5c6370;
+            --border-color: #2a3444;
+            --glow-primary: rgba(0, 255, 157, 0.15);
+            --glow-secondary: rgba(0, 200, 255, 0.1);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Outfit', sans-serif;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            min-height: 100vh;
+            line-height: 1.6;
+        }
+
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: 
+                radial-gradient(ellipse at 20% 20%, var(--glow-primary) 0%, transparent 50%),
+                radial-gradient(ellipse at 80% 80%, var(--glow-secondary) 0%, transparent 50%),
+                repeating-linear-gradient(0deg, transparent, transparent 50px, rgba(42, 52, 68, 0.1) 50px, rgba(42, 52, 68, 0.1) 51px),
+                repeating-linear-gradient(90deg, transparent, transparent 50px, rgba(42, 52, 68, 0.1) 50px, rgba(42, 52, 68, 0.1) 51px);
+            pointer-events: none;
+            z-index: -1;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 2rem;
+            padding-bottom: 2rem;
+            border-bottom: 1px solid var(--border-color);
+            flex-wrap: wrap;
+            gap: 1rem;
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .logo-icon {
+            width: 56px;
+            height: 56px;
+            background: linear-gradient(135deg, var(--accent-primary) 0%, var(--accent-secondary) 100%);
+            border-radius: 14px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            box-shadow: 0 4px 20px var(--glow-primary);
+        }
+
+        .logo-text h1 {
+            font-size: 1.6rem;
+            font-weight: 600;
+            background: linear-gradient(135deg, var(--accent-primary) 0%, var(--accent-secondary) 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .logo-text span {
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+            font-weight: 400;
+        }
+
+        .header-time {
+            text-align: right;
+        }
+
+        .header-time .date {
+            font-size: 1.1rem;
+            color: var(--text-primary);
+            font-weight: 500;
+        }
+
+        .header-time .time {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 2rem;
+            font-weight: 600;
+            color: var(--accent-primary);
+            text-shadow: 0 0 20px var(--glow-primary);
+        }
+
+        /* Control Panel */
+        .control-panel {
+            margin-bottom: 2rem;
+        }
+
+        .control-section {
+            margin-bottom: 1.5rem;
+        }
+
+        .control-section-title {
+            font-size: 0.8rem;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 0.75rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .control-section-title::before {
+            content: '';
+            width: 8px;
+            height: 2px;
+            background: var(--accent-primary);
+        }
+
+        .control-buttons {
+            display: flex;
+            gap: 1rem;
+            flex-wrap: wrap;
+        }
+
+        .capture-btn {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            padding: 1rem 1.5rem;
+            border: none;
+            border-radius: 12px;
+            font-family: 'Outfit', sans-serif;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .capture-btn.attendance {
+            background: linear-gradient(135deg, var(--accent-primary) 0%, #00cc7a 100%);
+            color: var(--bg-primary);
+        }
+
+        .capture-btn.attendance:hover:not(:disabled) {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(0, 255, 157, 0.4);
+        }
+
+        .capture-btn.register {
+            background: linear-gradient(135deg, var(--accent-purple) 0%, #7c3aed 100%);
+            color: white;
+        }
+
+        .capture-btn.register:hover:not(:disabled) {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(168, 85, 247, 0.4);
+        }
+
+        .capture-btn.webcam {
+            background: linear-gradient(135deg, var(--accent-secondary) 0%, #0284c7 100%);
+            color: white;
+        }
+
+        .capture-btn.webcam:hover:not(:disabled) {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(0, 200, 255, 0.4);
+        }
+
+        .capture-btn.upload {
+            background: var(--bg-tertiary);
+            border: 1px solid var(--border-color);
+            color: var(--text-secondary);
+        }
+
+        .capture-btn.upload:hover:not(:disabled) {
+            border-color: var(--accent-primary);
+            color: var(--accent-primary);
+        }
+
+        .capture-btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .capture-btn .icon {
+            font-size: 1.3rem;
+        }
+
+        .capture-btn.loading .icon {
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+
+        /* Hidden file input */
+        .hidden-input {
+            display: none;
+        }
+
+        /* Toast Container */
+        .toast-container {
+            position: fixed;
+            top: 2rem;
+            right: 2rem;
+            z-index: 1000;
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+
+        .toast {
+            padding: 1rem 1.5rem;
+            border-radius: 12px;
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            animation: slideIn 0.3s ease;
+            min-width: 300px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+        }
+
+        @keyframes slideIn {
+            from { transform: translateX(100%); opacity: 0; }
+            to { transform: translateX(0); opacity: 1; }
+        }
+
+        .toast.success { background: linear-gradient(135deg, var(--accent-primary), #00cc7a); color: var(--bg-primary); }
+        .toast.error { background: linear-gradient(135deg, var(--accent-error), #dc2626); color: white; }
+        .toast.warning { background: linear-gradient(135deg, var(--accent-warning), #f59e0b); color: var(--bg-primary); }
+        .toast.info { background: linear-gradient(135deg, var(--accent-secondary), #0284c7); color: white; }
+        .toast.registered { background: linear-gradient(135deg, var(--accent-purple), #7c3aed); color: white; }
+
+        /* Modal */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.8);
+            backdrop-filter: blur(4px);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+        }
+
+        .modal-overlay.active {
+            display: flex;
+        }
+
+        .modal {
+            background: var(--bg-secondary);
+            border: 1px solid var(--border-color);
+            border-radius: 20px;
+            padding: 2rem;
+            max-width: 600px;
+            width: 90%;
+            animation: modalIn 0.3s ease;
+            max-height: 90vh;
+            overflow-y: auto;
+        }
+
+        @keyframes modalIn {
+            from { transform: scale(0.9); opacity: 0; }
+            to { transform: scale(1); opacity: 1; }
+        }
+
+        .modal h2 {
+            font-size: 1.5rem;
+            margin-bottom: 0.5rem;
+            background: linear-gradient(135deg, var(--accent-purple), var(--accent-secondary));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .modal p {
+            color: var(--text-secondary);
+            margin-bottom: 1.5rem;
+        }
+
+        .modal-input {
+            width: 100%;
+            padding: 1rem;
+            border: 1px solid var(--border-color);
+            border-radius: 10px;
+            background: var(--bg-tertiary);
+            color: var(--text-primary);
+            font-family: 'Outfit', sans-serif;
+            font-size: 1rem;
+            margin-bottom: 1rem;
+            transition: border-color 0.2s ease;
+        }
+
+        .modal-input:focus {
+            outline: none;
+            border-color: var(--accent-purple);
+        }
+
+        .modal-tabs {
+            display: flex;
+            gap: 0.5rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .modal-tab {
+            flex: 1;
+            padding: 0.75rem;
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            background: var(--bg-tertiary);
+            color: var(--text-secondary);
+            font-family: 'Outfit', sans-serif;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .modal-tab.active {
+            background: var(--accent-primary);
+            color: var(--bg-primary);
+            border-color: var(--accent-primary);
+        }
+
+        .modal-tab:hover:not(.active) {
+            border-color: var(--accent-primary);
+        }
+
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        /* Webcam container */
+        .webcam-container {
+            position: relative;
+            background: var(--bg-tertiary);
+            border-radius: 12px;
+            overflow: hidden;
+            margin-bottom: 1rem;
+        }
+
+        .webcam-container video,
+        .webcam-container canvas {
+            width: 100%;
+            display: block;
+            border-radius: 12px;
+        }
+
+        .webcam-container canvas {
+            display: none;
+        }
+
+        .webcam-placeholder {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 3rem;
+            color: var(--text-muted);
+        }
+
+        .webcam-placeholder .icon {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+        }
+
+        /* File drop zone */
+        .drop-zone {
+            border: 2px dashed var(--border-color);
+            border-radius: 12px;
+            padding: 2rem;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            margin-bottom: 1rem;
+        }
+
+        .drop-zone:hover, .drop-zone.dragover {
+            border-color: var(--accent-primary);
+            background: rgba(0, 255, 157, 0.05);
+        }
+
+        .drop-zone .icon {
+            font-size: 2.5rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .drop-zone p {
+            margin: 0;
+            color: var(--text-secondary);
+        }
+
+        .drop-zone .file-name {
+            color: var(--accent-primary);
+            margin-top: 0.5rem;
+            font-weight: 500;
+        }
+
+        .preview-image {
+            max-width: 100%;
+            max-height: 200px;
+            border-radius: 8px;
+            margin-top: 1rem;
+        }
+
+        .modal-buttons {
+            display: flex;
+            gap: 1rem;
+            margin-top: 1.5rem;
+        }
+
+        .modal-btn {
+            flex: 1;
+            padding: 0.875rem;
+            border: none;
+            border-radius: 10px;
+            font-family: 'Outfit', sans-serif;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .modal-btn.cancel {
+            background: var(--bg-tertiary);
+            color: var(--text-secondary);
+            border: 1px solid var(--border-color);
+        }
+
+        .modal-btn.cancel:hover { border-color: var(--text-secondary); }
+
+        .modal-btn.confirm {
+            background: linear-gradient(135deg, var(--accent-purple), #7c3aed);
+            color: white;
+        }
+
+        .modal-btn.confirm:hover:not(:disabled) {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 15px rgba(168, 85, 247, 0.4);
+        }
+
+        .modal-btn.confirm.green {
+            background: linear-gradient(135deg, var(--accent-primary), #00cc7a);
+            color: var(--bg-primary);
+        }
+
+        .modal-btn:disabled { opacity: 0.6; cursor: not-allowed; }
+
+        /* Stats Grid */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .stat-card {
+            background: var(--bg-secondary);
+            border: 1px solid var(--border-color);
+            border-radius: 16px;
+            padding: 1.5rem;
+            position: relative;
+            overflow: hidden;
+            transition: all 0.3s ease;
+        }
+
+        .stat-card:hover {
+            border-color: var(--accent-primary);
+            transform: translateY(-4px);
+            box-shadow: 0 8px 32px var(--glow-primary);
+        }
+
+        .stat-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 3px;
+            background: linear-gradient(90deg, var(--accent-primary), var(--accent-secondary));
+        }
+
+        .stat-card.warning::before { background: linear-gradient(90deg, var(--accent-warning), #ff6b00); }
+
+        .stat-label {
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 0.5rem;
+        }
+
+        .stat-value {
+            font-size: 2.5rem;
+            font-weight: 700;
+            font-family: 'JetBrains Mono', monospace;
+            color: var(--text-primary);
+        }
+
+        .stat-subtext {
+            font-size: 0.8rem;
+            color: var(--text-muted);
+            margin-top: 0.5rem;
+        }
+
+        /* Main Grid */
+        .main-grid {
+            display: grid;
+            grid-template-columns: 1fr 380px;
+            gap: 2rem;
+        }
+
+        @media (max-width: 1024px) {
+            .main-grid { grid-template-columns: 1fr; }
+        }
+
+        .panel {
+            background: var(--bg-secondary);
+            border: 1px solid var(--border-color);
+            border-radius: 16px;
+            overflow: hidden;
+        }
+
+        .panel-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1.25rem 1.5rem;
+            border-bottom: 1px solid var(--border-color);
+            background: var(--bg-tertiary);
+        }
+
+        .panel-title {
+            font-size: 1.1rem;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        .panel-title::before {
+            content: '';
+            width: 8px;
+            height: 8px;
+            background: var(--accent-primary);
+            border-radius: 50%;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; transform: scale(1); }
+            50% { opacity: 0.5; transform: scale(1.2); }
+        }
+
+        .badge {
+            background: var(--accent-primary);
+            color: var(--bg-primary);
+            padding: 0.25rem 0.75rem;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            font-weight: 600;
+        }
+
+        .panel-content {
+            max-height: 500px;
+            overflow-y: auto;
+        }
+
+        .log-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        .log-table th {
+            text-align: left;
+            padding: 1rem 1.5rem;
+            font-size: 0.75rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            color: var(--text-secondary);
+            background: var(--bg-tertiary);
+            position: sticky;
+            top: 0;
+        }
+
+        .log-table td {
+            padding: 1rem 1.5rem;
+            border-bottom: 1px solid var(--border-color);
+            vertical-align: middle;
+        }
+
+        .log-table tbody tr {
+            transition: background 0.2s ease;
+        }
+
+        .log-table tbody tr:hover { background: var(--bg-tertiary); }
+
+        .student-cell {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        .student-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 10px;
+            background: linear-gradient(135deg, var(--accent-primary), var(--accent-secondary));
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 600;
+            font-size: 0.9rem;
+            color: var(--bg-primary);
+        }
+
+        .student-name { font-weight: 500; }
+
+        .timestamp {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+        }
+
+        .confidence-bar {
+            width: 60px;
+            height: 6px;
+            background: var(--bg-tertiary);
+            border-radius: 3px;
+            overflow: hidden;
+        }
+
+        .confidence-fill {
+            height: 100%;
+            background: linear-gradient(90deg, var(--accent-primary), var(--accent-secondary));
+            border-radius: 3px;
+        }
+
+        .confidence-text {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.75rem;
+            color: var(--text-secondary);
+            margin-top: 0.25rem;
+        }
+
+        .student-list { padding: 1rem; }
+
+        .student-item {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            padding: 1rem;
+            border-radius: 12px;
+            transition: background 0.2s ease;
+            margin-bottom: 0.5rem;
+        }
+
+        .student-item:hover { background: var(--bg-tertiary); }
+        .student-item .student-avatar { width: 48px; height: 48px; font-size: 1.1rem; }
+        .student-info { flex: 1; }
+        .student-info .name { font-weight: 500; margin-bottom: 0.25rem; }
+        .student-info .status { font-size: 0.8rem; color: var(--accent-primary); }
+        .student-info .status.absent { color: var(--text-muted); }
+
+        .empty-state {
+            text-align: center;
+            padding: 4rem 2rem;
+            color: var(--text-muted);
+        }
+
+        .empty-state-icon { font-size: 4rem; margin-bottom: 1rem; opacity: 0.5; }
+        .empty-state h3 { font-size: 1.2rem; color: var(--text-secondary); margin-bottom: 0.5rem; }
+
+        .refresh-btn {
+            background: transparent;
+            border: 1px solid var(--border-color);
+            color: var(--text-secondary);
+            padding: 0.5rem 1rem;
+            border-radius: 8px;
+            font-family: 'Outfit', sans-serif;
+            font-size: 0.85rem;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .refresh-btn:hover { border-color: var(--accent-primary); color: var(--accent-primary); }
+
+        ::-webkit-scrollbar { width: 8px; }
+        ::-webkit-scrollbar-track { background: var(--bg-tertiary); }
+        ::-webkit-scrollbar-thumb { background: var(--border-color); border-radius: 4px; }
+        ::-webkit-scrollbar-thumb:hover { background: var(--text-muted); }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .stat-card, .panel { animation: fadeIn 0.5s ease forwards; }
+        .stat-card:nth-child(1) { animation-delay: 0.1s; }
+        .stat-card:nth-child(2) { animation-delay: 0.2s; }
+        .stat-card:nth-child(3) { animation-delay: 0.3s; }
+        .stat-card:nth-child(4) { animation-delay: 0.4s; }
+
+        .esp-status {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.5rem 1rem;
+            background: var(--bg-tertiary);
+            border-radius: 8px;
+            font-size: 0.85rem;
+        }
+
+        .esp-status .dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: var(--accent-error);
+        }
+
+        .esp-status .dot.online {
+            background: var(--accent-primary);
+            animation: pulse 2s infinite;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <div class="logo">
+                <div class="logo-icon">👁️</div>
+                <div class="logo-text">
+                    <h1>FaceTrack</h1>
+                    <span>Attendance Recognition System</span>
+                </div>
+            </div>
+            <div class="esp-status">
+                <div class="dot" id="esp-dot"></div>
+                <span id="esp-status-text">ESP32-CAM: Checking...</span>
+            </div>
+            <div class="header-time">
+                <div class="date" id="current-date"></div>
+                <div class="time" id="current-time"></div>
+            </div>
+        </header>
+
+        <!-- Control Panel -->
+        <div class="control-panel">
+            <!-- ESP32-CAM Controls -->
+            <div class="control-section">
+                <div class="control-section-title">ESP32-CAM Capture</div>
+                <div class="control-buttons">
+                    <button class="capture-btn attendance" id="btn-attendance" onclick="captureAttendance()">
+                        <span class="icon">📸</span>
+                        <span>Capture Attendance</span>
+                    </button>
+                    <button class="capture-btn register" id="btn-register" onclick="openRegisterModal('esp32')">
+                        <span class="icon">👤</span>
+                        <span>Register New Student</span>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Fallback Controls -->
+            <div class="control-section">
+                <div class="control-section-title">Fallback Options (No ESP32 Required)</div>
+                <div class="control-buttons">
+                    <button class="capture-btn webcam" onclick="openWebcamModal('attendance')">
+                        <span class="icon">🎥</span>
+                        <span>Webcam Attendance</span>
+                    </button>
+                    <button class="capture-btn webcam" onclick="openWebcamModal('register')">
+                        <span class="icon">🎥</span>
+                        <span>Webcam Register</span>
+                    </button>
+                    <button class="capture-btn upload" onclick="openUploadModal('attendance')">
+                        <span class="icon">📁</span>
+                        <span>Upload Photo</span>
+                    </button>
+                    <button class="capture-btn upload" onclick="openUploadModal('register')">
+                        <span class="icon">📁</span>
+                        <span>Upload & Register</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <div class="stats-grid">
+            <div class="stat-card">
+                <div class="stat-label">Today's Attendance</div>
+                <div class="stat-value" id="stat-today-unique">{{ stats.today_unique_students }}</div>
+                <div class="stat-subtext">Unique students present</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-label">Total Scans Today</div>
+                <div class="stat-value" id="stat-today-logs">{{ stats.today_logs }}</div>
+                <div class="stat-subtext">Recognition attempts</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-label">Registered Students</div>
+                <div class="stat-value" id="stat-students">{{ students|length }}</div>
+                <div class="stat-subtext">In the system</div>
+            </div>
+            <div class="stat-card warning">
+                <div class="stat-label">All-Time Records</div>
+                <div class="stat-value" id="stat-total">{{ stats.total_logs }}</div>
+                <div class="stat-subtext">Total attendance logs</div>
+            </div>
+        </div>
+
+        <div class="main-grid">
+            <div class="panel">
+                <div class="panel-header">
+                    <span class="panel-title">Today's Attendance Log</span>
+                    <button class="refresh-btn" onclick="refreshData()">↻ Refresh</button>
+                </div>
+                <div class="panel-content" id="attendance-list">
+                    {% if logs %}
+                    <table class="log-table">
+                        <thead>
+                            <tr>
+                                <th>Student</th>
+                                <th>Time</th>
+                                <th>Confidence</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for log in logs %}
+                            <tr>
+                                <td>
+                                    <div class="student-cell">
+                                        <div class="student-avatar">{{ log.student_name[0]|upper }}</div>
+                                        <span class="student-name">{{ log.student_name }}</span>
+                                    </div>
+                                </td>
+                                <td><span class="timestamp">{{ log.timestamp }}</span></td>
+                                <td>
+                                    {% if log.confidence %}
+                                    <div class="confidence-bar">
+                                        <div class="confidence-fill" style="width: {{ (log.confidence * 100)|int }}%"></div>
+                                    </div>
+                                    <div class="confidence-text">{{ "%.1f"|format(log.confidence * 100) }}%</div>
+                                    {% else %}
+                                    <span class="confidence-text">N/A</span>
+                                    {% endif %}
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                    {% else %}
+                    <div class="empty-state">
+                        <div class="empty-state-icon">📋</div>
+                        <h3>No attendance records yet</h3>
+                        <p>Click any capture button to start</p>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+
+            <div class="panel">
+                <div class="panel-header">
+                    <span class="panel-title">Registered Students</span>
+                    <span class="badge" id="student-count">{{ students|length }}</span>
+                </div>
+                <div class="panel-content" id="student-list">
+                    {% if students %}
+                    <div class="student-list">
+                        {% for student in students %}
+                        {% set attended = student in (unique_today | map(attribute='student_name') | list) %}
+                        <div class="student-item">
+                            <div class="student-avatar" style="{% if not attended %}opacity: 0.5; background: var(--bg-tertiary);{% endif %}">
+                                {{ student[0]|upper }}
+                            </div>
+                            <div class="student-info">
+                                <div class="name">{{ student }}</div>
+                                <div class="status {% if not attended %}absent{% endif %}">
+                                    {% if attended %}✓ Present{% else %}— Not checked in{% endif %}
+                                </div>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                    {% else %}
+                    <div class="empty-state">
+                        <div class="empty-state-icon">👤</div>
+                        <h3>No students registered</h3>
+                        <p>Use any register option above</p>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Toast Container -->
+    <div class="toast-container" id="toast-container"></div>
+
+    <!-- ESP32 Register Modal -->
+    <div class="modal-overlay" id="register-modal">
+        <div class="modal">
+            <h2>Register New Student</h2>
+            <p>Enter the student's name, then position them in front of the ESP32-CAM and click capture.</p>
+            <input type="text" class="modal-input" id="student-name-input" placeholder="Enter student name..." autocomplete="off">
+            <div class="modal-buttons">
+                <button class="modal-btn cancel" onclick="closeModal('register-modal')">Cancel</button>
+                <button class="modal-btn confirm" id="btn-register-confirm" onclick="captureRegister()">📸 Capture & Register</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Webcam Modal -->
+    <div class="modal-overlay" id="webcam-modal">
+        <div class="modal">
+            <h2 id="webcam-modal-title">Webcam Capture</h2>
+            <p id="webcam-modal-desc">Position your face in the camera and click capture.</p>
+            <input type="text" class="modal-input" id="webcam-name-input" placeholder="Enter student name..." autocomplete="off" style="display: none;">
+            <div class="webcam-container">
+                <video id="webcam-video" autoplay playsinline></video>
+                <canvas id="webcam-canvas"></canvas>
+                <div class="webcam-placeholder" id="webcam-placeholder">
+                    <div class="icon">🎥</div>
+                    <p>Click "Start Camera" to begin</p>
+                </div>
+            </div>
+            <div class="modal-buttons">
+                <button class="modal-btn cancel" onclick="closeWebcamModal()">Cancel</button>
+                <button class="modal-btn confirm" id="btn-start-webcam" onclick="startWebcam()">🎥 Start Camera</button>
+                <button class="modal-btn confirm green" id="btn-webcam-capture" onclick="captureWebcam()" style="display: none;">📸 Capture</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Upload Modal -->
+    <div class="modal-overlay" id="upload-modal">
+        <div class="modal">
+            <h2 id="upload-modal-title">Upload Photo</h2>
+            <p id="upload-modal-desc">Select or drag an image file.</p>
+            <input type="text" class="modal-input" id="upload-name-input" placeholder="Enter student name..." autocomplete="off" style="display: none;">
+            <div class="drop-zone" id="drop-zone" onclick="document.getElementById('file-input').click()">
+                <div class="icon">📁</div>
+                <p>Click to select or drag & drop an image</p>
+                <p class="file-name" id="selected-file-name"></p>
+            </div>
+            <input type="file" id="file-input" class="hidden-input" accept="image/*" onchange="handleFileSelect(event)">
+            <img id="preview-image" class="preview-image" style="display: none;">
+            <div class="modal-buttons">
+                <button class="modal-btn cancel" onclick="closeModal('upload-modal')">Cancel</button>
+                <button class="modal-btn confirm green" id="btn-upload-submit" onclick="submitUpload()" disabled>📤 Submit</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let isCapturing = false;
+        let pollInterval = null;
+        let webcamStream = null;
+        let currentWebcamMode = 'attendance';
+        let currentUploadMode = 'attendance';
+        let selectedFile = null;
+
+        // Update clock
+        function updateClock() {
+            const now = new Date();
+            const dateOptions = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
+            document.getElementById('current-date').textContent = now.toLocaleDateString('en-US', dateOptions);
+            const timeStr = now.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false });
+            document.getElementById('current-time').textContent = timeStr;
+        }
+        updateClock();
+        setInterval(updateClock, 1000);
+
+        // Toast notifications
+        function showToast(message, type = 'info', duration = 4000) {
+            const container = document.getElementById('toast-container');
+            const toast = document.createElement('div');
+            toast.className = `toast ${type}`;
+            const icons = { success: '✓', error: '✗', warning: '⚠', info: 'ℹ', registered: '👤' };
+            toast.innerHTML = `<span>${icons[type] || 'ℹ'}</span><span>${message}</span>`;
+            container.appendChild(toast);
+            setTimeout(() => {
+                toast.style.animation = 'slideIn 0.3s ease reverse';
+                setTimeout(() => toast.remove(), 300);
+            }, duration);
+        }
+
+        // Modal functions
+        function closeModal(modalId) {
+            document.getElementById(modalId).classList.remove('active');
+        }
+
+        function openRegisterModal(source) {
+            document.getElementById('register-modal').classList.add('active');
+            document.getElementById('student-name-input').focus();
+        }
+
+        // ESP32 Capture functions
+        async function captureAttendance() {
+            if (isCapturing) return;
+            setCapturing(true, 'attendance');
+            showToast('Sending capture command to ESP32-CAM...', 'info');
+            try {
+                const response = await fetch('/api/command/capture', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ mode: 'attendance' })
+                });
+                if (response.ok) { pollForResult(); } 
+                else { throw new Error('Failed to send command'); }
+            } catch (error) {
+                showToast('Failed to send capture command', 'error');
+                setCapturing(false);
+            }
+        }
+
+        async function captureRegister() {
+            if (isCapturing) return;
+            const name = document.getElementById('student-name-input').value.trim();
+            if (!name) { showToast('Please enter a student name', 'warning'); return; }
+            setCapturing(true, 'register');
+            closeModal('register-modal');
+            showToast(`Registering ${name}...`, 'info');
+            try {
+                const response = await fetch('/api/command/capture', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ mode: 'register', name: name })
+                });
+                if (response.ok) { pollForResult(); }
+                else { throw new Error('Failed to send command'); }
+            } catch (error) {
+                showToast('Failed to send capture command', 'error');
+                setCapturing(false);
+            }
+        }
+
+        function pollForResult() {
+            let attempts = 0;
+            pollInterval = setInterval(async () => {
+                attempts++;
+                try {
+                    const response = await fetch('/api/command/result');
+                    const data = await response.json();
+                    if (data.status === 'waiting') {
+                        if (attempts >= 30) {
+                            clearInterval(pollInterval);
+                            showToast('Capture timed out. Is ESP32-CAM connected?', 'error');
+                            setCapturing(false);
+                        }
+                        return;
+                    }
+                    clearInterval(pollInterval);
+                    handleResult(data);
+                    setCapturing(false);
+                    fetch('/api/command/clear', { method: 'POST' });
+                } catch (error) { console.error('Poll error:', error); }
+            }, 1000);
+        }
+
+        function handleResult(data) {
+            switch (data.status) {
+                case 'success': showToast(`Attendance logged: ${data.name} (${(data.confidence * 100).toFixed(1)}%)`, 'success'); refreshData(); break;
+                case 'registered': showToast(`Successfully registered: ${data.name}`, 'registered', 5000); refreshData(); break;
+                case 'duplicate': showToast(`${data.name} already logged recently`, 'warning'); break;
+                case 'unknown': showToast('Face not recognized', 'warning'); break;
+                case 'error': showToast(data.message || 'An error occurred', 'error'); break;
+                default: showToast('Unknown response', 'warning');
+            }
+        }
+
+        function setCapturing(capturing, mode = 'attendance') {
+            isCapturing = capturing;
+            document.getElementById('btn-attendance').disabled = capturing;
+            document.getElementById('btn-register').disabled = capturing;
+        }
+
+        // Webcam functions
+        async function openWebcamModal(mode) {
+            currentWebcamMode = mode;
+            const title = mode === 'register' ? 'Register via Webcam' : 'Attendance via Webcam';
+            const desc = mode === 'register' ? 'Enter name and click capture.' : 'Position your face and click capture.';
+            document.getElementById('webcam-modal-title').textContent = title;
+            document.getElementById('webcam-modal-desc').textContent = desc;
+            document.getElementById('webcam-name-input').style.display = mode === 'register' ? 'block' : 'none';
+            document.getElementById('webcam-name-input').value = '';
+            document.getElementById('webcam-modal').classList.add('active');
+            document.getElementById('webcam-placeholder').style.display = 'flex';
+            document.getElementById('webcam-video').style.display = 'none';
+            document.getElementById('btn-start-webcam').style.display = 'none';
+            document.getElementById('btn-webcam-capture').style.display = 'none';
+            
+            // Auto-start webcam immediately
+            await startWebcam();
+        }
+
+        function closeWebcamModal() {
+            if (webcamStream) {
+                webcamStream.getTracks().forEach(track => track.stop());
+                webcamStream = null;
+            }
+            closeModal('webcam-modal');
+        }
+
+        async function startWebcam() {
+            try {
+                document.getElementById('webcam-placeholder').innerHTML = '<div class="icon">⏳</div><p>Starting camera...</p>';
+                
+                webcamStream = await navigator.mediaDevices.getUserMedia({ 
+                    video: { 
+                        facingMode: 'user', 
+                        width: { ideal: 640 }, 
+                        height: { ideal: 480 } 
+                    },
+                    audio: false
+                });
+                
+                const video = document.getElementById('webcam-video');
+                video.srcObject = webcamStream;
+                
+                // Wait for video to be ready
+                await new Promise((resolve) => {
+                    video.onloadedmetadata = () => {
+                        video.play();
+                        resolve();
+                    };
+                });
+                
+                video.style.display = 'block';
+                document.getElementById('webcam-placeholder').style.display = 'none';
+                document.getElementById('btn-webcam-capture').style.display = 'block';
+                
+                if (currentWebcamMode === 'register') {
+                    document.getElementById('webcam-name-input').focus();
+                }
+            } catch (error) {
+                console.error('Webcam error:', error);
+                document.getElementById('webcam-placeholder').innerHTML = 
+                    '<div class="icon">❌</div><p>Could not access webcam</p><p style="font-size:0.8rem;">' + error.message + '</p>';
+                showToast('Could not access webcam: ' + error.message, 'error');
+            }
+        }
+
+        async function captureWebcam() {
+            const name = document.getElementById('webcam-name-input').value.trim();
+            if (currentWebcamMode === 'register' && !name) {
+                showToast('Please enter a student name', 'warning');
+                document.getElementById('webcam-name-input').focus();
+                return;
+            }
+
+            const video = document.getElementById('webcam-video');
+            const canvas = document.getElementById('webcam-canvas');
+            
+            // Set canvas size to match video
+            canvas.width = video.videoWidth || 640;
+            canvas.height = video.videoHeight || 480;
+            
+            // Draw current frame to canvas
+            const ctx = canvas.getContext('2d');
+            ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+            
+            // Convert to blob for faster upload
+            const blob = await new Promise(resolve => canvas.toBlob(resolve, 'image/jpeg', 0.92));
+            
+            // Close modal and stop webcam immediately
+            closeWebcamModal();
+            showToast('Processing...', 'info');
+
+            try {
+                const formData = new FormData();
+                formData.append('image', blob, 'webcam.jpg');
+                if (currentWebcamMode === 'register') {
+                    formData.append('name', name);
+                }
+
+                const endpoint = currentWebcamMode === 'register' ? '/api/web/register' : '/api/web/attendance';
+                const response = await fetch(endpoint, {
+                    method: 'POST',
+                    body: formData
+                });
+                const data = await response.json();
+                handleResult(data);
+            } catch (error) {
+                showToast('Error: ' + error.message, 'error');
+            }
+        }
+
+        // Upload functions
+        function openUploadModal(mode) {
+            currentUploadMode = mode;
+            const title = mode === 'register' ? 'Register via Upload' : 'Attendance via Upload';
+            const desc = mode === 'register' ? 'Enter name and upload a photo.' : 'Upload a photo for attendance.';
+            document.getElementById('upload-modal-title').textContent = title;
+            document.getElementById('upload-modal-desc').textContent = desc;
+            document.getElementById('upload-name-input').style.display = mode === 'register' ? 'block' : 'none';
+            document.getElementById('upload-name-input').value = '';
+            document.getElementById('selected-file-name').textContent = '';
+            document.getElementById('preview-image').style.display = 'none';
+            document.getElementById('file-input').value = '';
+            document.getElementById('btn-upload-submit').disabled = true;
+            selectedFile = null;
+            document.getElementById('upload-modal').classList.add('active');
+        }
+
+        function handleFileSelect(event) {
+            const file = event.target.files[0];
+            if (file) {
+                selectedFile = file;
+                document.getElementById('selected-file-name').textContent = file.name;
+                document.getElementById('btn-upload-submit').disabled = false;
+                
+                const reader = new FileReader();
+                reader.onload = (e) => {
+                    document.getElementById('preview-image').src = e.target.result;
+                    document.getElementById('preview-image').style.display = 'block';
+                };
+                reader.readAsDataURL(file);
+            }
+        }
+
+        // Drag and drop
+        const dropZone = document.getElementById('drop-zone');
+        dropZone.addEventListener('dragover', (e) => { e.preventDefault(); dropZone.classList.add('dragover'); });
+        dropZone.addEventListener('dragleave', () => { dropZone.classList.remove('dragover'); });
+        dropZone.addEventListener('drop', (e) => {
+            e.preventDefault();
+            dropZone.classList.remove('dragover');
+            const file = e.dataTransfer.files[0];
+            if (file && file.type.startsWith('image/')) {
+                document.getElementById('file-input').files = e.dataTransfer.files;
+                handleFileSelect({ target: { files: [file] } });
+            }
+        });
+
+        async function submitUpload() {
+            if (!selectedFile) return;
+            
+            const name = document.getElementById('upload-name-input').value.trim();
+            if (currentUploadMode === 'register' && !name) {
+                showToast('Please enter a student name', 'warning');
+                document.getElementById('upload-name-input').focus();
+                return;
+            }
+
+            // Disable button immediately
+            document.getElementById('btn-upload-submit').disabled = true;
+            closeModal('upload-modal');
+            showToast('Processing...', 'info');
+
+            try {
+                const formData = new FormData();
+                formData.append('image', selectedFile);
+                if (currentUploadMode === 'register') {
+                    formData.append('name', name);
+                }
+
+                const endpoint = currentUploadMode === 'register' ? '/api/web/register' : '/api/web/attendance';
+                const response = await fetch(endpoint, { method: 'POST', body: formData });
+                const data = await response.json();
+                handleResult(data);
+                selectedFile = null;
+            } catch (error) {
+                showToast('Error: ' + error.message, 'error');
+            }
+        }
+
+        async function refreshData() { location.reload(); }
+
+        async function checkESPStatus() {
+            const dot = document.getElementById('esp-dot');
+            const text = document.getElementById('esp-status-text');
+            try {
+                await fetch('/api/command/poll');
+                dot.classList.add('online');
+                text.textContent = 'ESP32-CAM: Ready';
+            } catch (error) {
+                dot.classList.remove('online');
+                text.textContent = 'ESP32-CAM: Offline';
+            }
+        }
+        checkESPStatus();
+        setInterval(checkESPStatus, 10000);
+
+        // Enter key handlers
+        document.getElementById('student-name-input').addEventListener('keypress', (e) => { if (e.key === 'Enter') captureRegister(); });
+        document.getElementById('webcam-name-input').addEventListener('keypress', (e) => { if (e.key === 'Enter' && webcamStream) captureWebcam(); });
+        document.getElementById('upload-name-input').addEventListener('keypress', (e) => { if (e.key === 'Enter' && selectedFile) submitUpload(); });
+
+        // Prevent modal content clicks from bubbling to overlay
+        document.querySelectorAll('.modal').forEach(modal => {
+            modal.addEventListener('click', (e) => {
+                e.stopPropagation();
+            });
+        });
+
+        // Close modals on overlay click (only when clicking the overlay itself)
+        document.querySelectorAll('.modal-overlay').forEach(overlay => {
+            overlay.addEventListener('click', (e) => {
+                // Only close if clicking directly on the overlay background
+                if (e.target === overlay) {
+                    if (overlay.id === 'webcam-modal') {
+                        closeWebcamModal();
+                    } else {
+                        closeModal(overlay.id);
+                    }
+                }
+            });
+        });
+    </script>
+</body>
+</html>
