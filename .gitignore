@@ -1,0 +1,44 @@
+# Virtual Environment
+venv/
+env/
+.venv/
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+*.egg-info/
+.eggs/
+dist/
+build/
+
+# Database
+*.db
+*.db-journal
+
+# Uploaded images (optional - uncomment to ignore)
+# uploads/
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Backup files
+*.bak
+*_backup_*.db
+
+# Logs
+*.log
+
+# Environment variables
+.env
+.env.local
