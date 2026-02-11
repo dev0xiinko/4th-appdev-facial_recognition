@@ -118,23 +118,38 @@ def wipe_uploads():
 
 
 def wipe_known_faces():
-    """Wipe all known face images."""
-    if not os.path.exists(KNOWN_FACES_DIR):
-        print("  ⚠ Known faces folder not found.")
-        return 0
-    
+    """Wipe all known face images and student records from database."""
     count = 0
-    valid_ext = {'.jpg', '.jpeg', '.png', '.gif', '.bmp'}
-    for filename in os.listdir(KNOWN_FACES_DIR):
-        if filename.startswith('.'):
-            continue
-        ext = os.path.splitext(filename)[1].lower()
-        if ext in valid_ext:
-            filepath = os.path.join(KNOWN_FACES_DIR, filename)
-            os.remove(filepath)
-            count += 1
     
-    print(f"  ✓ Deleted {count} known face images")
+    # Delete face images
+    if os.path.exists(KNOWN_FACES_DIR):
+        valid_ext = {'.jpg', '.jpeg', '.png', '.gif', '.bmp'}
+        for filename in os.listdir(KNOWN_FACES_DIR):
+            if filename.startswith('.'):
+                continue
+            ext = os.path.splitext(filename)[1].lower()
+            if ext in valid_ext:
+                filepath = os.path.join(KNOWN_FACES_DIR, filename)
+                os.remove(filepath)
+                count += 1
+        print(f"  ✓ Deleted {count} known face images")
+    else:
+        print("  ⚠ Known faces folder not found.")
+    
+    # Also delete student records from database
+    try:
+        conn = sqlite3.connect(DATABASE_PATH)
+        cursor = conn.cursor()
+        cursor.execute("SELECT COUNT(*) FROM students")
+        student_count = cursor.fetchone()[0]
+        cursor.execute("DELETE FROM students")
+        conn.commit()
+        conn.close()
+        if student_count > 0:
+            print(f"  ✓ Deleted {student_count} student records from database")
+    except Exception as e:
+        pass  # Table might not exist yet
+    
     return count
 
 

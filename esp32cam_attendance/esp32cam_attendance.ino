@@ -31,8 +31,8 @@
 // =============================================================================
 
 // WiFi credentials
-const char* ssid = "YOUR_WIFI_SSID";
-const char* password = "YOUR_WIFI_PASSWORD";
+const char* ssid = "Adrian";
+const char* password = "09226611";
 
 // Server IP address (without http:// and port)
 const char* serverIP = "192.168.1.13";
@@ -68,7 +68,6 @@ const int FLASH_BRIGHTNESS = 100;  // 0-255
 #define PCLK_GPIO_NUM     22
 
 #define LED_GPIO_NUM       4
-#define LED_LEDC_CHANNEL   2
 
 // =============================================================================
 // GLOBAL VARIABLES
@@ -162,35 +161,35 @@ bool initCamera() {
 // =============================================================================
 
 void setupFlash() {
-    ledcSetup(LED_LEDC_CHANNEL, 5000, 8);
-    ledcAttachPin(LED_GPIO_NUM, LED_LEDC_CHANNEL);
-    ledcWrite(LED_LEDC_CHANNEL, 0);
+    // ESP32 Arduino Core 3.x API: ledcAttach(pin, freq, resolution)
+    ledcAttach(LED_GPIO_NUM, 5000, 8);
+    ledcWrite(LED_GPIO_NUM, 0);
 }
 
 void flashOn() {
     if (USE_FLASH) {
-        ledcWrite(LED_LEDC_CHANNEL, FLASH_BRIGHTNESS);
+        ledcWrite(LED_GPIO_NUM, FLASH_BRIGHTNESS);
     }
 }
 
 void flashOff() {
-    ledcWrite(LED_LEDC_CHANNEL, 0);
+    ledcWrite(LED_GPIO_NUM, 0);
 }
 
 void blinkLED(int times, int delayMs) {
     for (int i = 0; i < times; i++) {
-        ledcWrite(LED_LEDC_CHANNEL, 50);
+        ledcWrite(LED_GPIO_NUM, 50);
         delay(delayMs);
-        ledcWrite(LED_LEDC_CHANNEL, 0);
+        ledcWrite(LED_GPIO_NUM, 0);
         delay(delayMs);
     }
 }
 
 // Quick status blink (non-blocking visual feedback)
 void quickBlink() {
-    ledcWrite(LED_LEDC_CHANNEL, 20);
+    ledcWrite(LED_GPIO_NUM, 20);
     delay(50);
-    ledcWrite(LED_LEDC_CHANNEL, 0);
+    ledcWrite(LED_GPIO_NUM, 0);
 }
 
 // =============================================================================
@@ -368,16 +367,29 @@ void parseResponse(String response) {
     
     const char* status = doc["status"];
     
+    // Check if this is a logout/time-out response
+    const char* logType = "IN";
+    if (doc.containsKey("log_type")) {
+        logType = doc["log_type"];
+    }
+    bool isLogout = (strcmp(logType, "OUT") == 0);
+    
     if (strcmp(status, "success") == 0) {
         const char* name = doc["name"];
         float confidence = doc["confidence"];
         
-        Serial.println("✓ ATTENDANCE LOGGED!");
-        Serial.printf("  Student: %s\n", name);
-        Serial.printf("  Confidence: %.1f%%\n", confidence * 100);
-        
-        // Success - long blink
-        blinkLED(1, 500);
+        if (isLogout) {
+            Serial.println("✓ TIME OUT LOGGED!");
+            Serial.printf("  Student: %s (Goodbye!)\n", name);
+            // Logout success - two short blinks
+            blinkLED(2, 200);
+        } else {
+            Serial.println("✓ TIME IN LOGGED!");
+            Serial.printf("  Student: %s\n", name);
+            Serial.printf("  Confidence: %.1f%%\n", confidence * 100);
+            // Time in success - one long blink
+            blinkLED(1, 500);
+        }
         
     } else if (strcmp(status, "registered") == 0) {
         const char* name = doc["name"];
@@ -391,7 +403,11 @@ void parseResponse(String response) {
     } else if (strcmp(status, "duplicate") == 0) {
         const char* name = doc["name"];
         
-        Serial.println("○ DUPLICATE ENTRY");
+        if (isLogout) {
+            Serial.println("○ ALREADY LOGGED OUT");
+        } else {
+            Serial.println("○ ALREADY LOGGED IN");
+        }
         Serial.printf("  Student: %s\n", name);
         
         // Duplicate - two quick blinks

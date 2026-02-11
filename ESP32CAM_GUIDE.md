@@ -160,12 +160,12 @@ If you don't have ESP32-CAM-MB:
 │  Search: esp32                                              │
 │  ┌─────────────────────────────────────────────────────┐   │
 │  │                                                     │   │
-│  │  esp32 by Espressif Systems          [INSTALL]     │   │
+│  │  esp32 by Espressif Systems          [INSTALL]      │   │
 │  │  Version: 2.x.x                                     │   │
 │  │                                                     │   │
 │  │  Boards included in this package:                   │   │
 │  │  • ESP32 Dev Module                                 │   │
-│  │  • AI Thinker ESP32-CAM  ← This one!               │   │
+│  │  • AI Thinker ESP32-CAM  ← This one!                │   │
 │  │  • ESP32-WROVER                                     │   │
 │  │  • ...                                              │   │
 │  │                                                     │   │
@@ -185,16 +185,16 @@ If you don't have ESP32-CAM-MB:
 │  Library Manager                                            │
 ├─────────────────────────────────────────────────────────────┤
 │  Search: ArduinoJson                                        │
-│  ┌─────────────────────────────────────────────────────┐   │
-│  │                                                     │   │
-│  │  ArduinoJson                          [INSTALL]     │   │
-│  │  by Benoit Blanchon                                 │   │
-│  │  Version: 7.x.x                                     │   │
-│  │                                                     │   │
-│  │  A simple and efficient JSON library for           │   │
-│  │  embedded C++                                        │   │
-│  │                                                     │   │
-│  └─────────────────────────────────────────────────────┘   │
+│  ┌─────────────────────────────────────────────────────┐    │
+│  │                                                     │    │
+│  │  ArduinoJson                          [INSTALL]     │    │
+│  │  by Benoit Blanchon                                 │    │
+│  │  Version: 7.x.x                                     │    │
+│  │                                                     │    │
+│  │  A simple and efficient JSON library for            │    │
+│  │  embedded C++                                       │    │
+│  │                                                     │    │
+│  └─────────────────────────────────────────────────────┘    │
 └─────────────────────────────────────────────────────────────┘
 ```
 
@@ -218,30 +218,30 @@ This is the easiest method - just plug and play!
 
 ```
 ┌─────────────────────────────────────────────────────────────┐
-│                ESP32-CAM-MB PROGRAMMER                       │
+│                ESP32-CAM-MB PROGRAMMER                      │
 ├─────────────────────────────────────────────────────────────┤
 │                                                             │
-│    ┌─────────────────────────────────┐                     │
-│    │                                 │                     │
-│    │         ESP32-CAM               │                     │
-│    │      (plugs in here)            │                     │
-│    │           ↓ ↓ ↓                 │                     │
-│    │    ● ● ● ● ● ● ● ●              │                     │
-│    │    │ │ │ │ │ │ │ │              │                     │
-│    ├────┴─┴─┴─┴─┴─┴─┴─┴──────────────┤                     │
-│    │                                 │                     │
-│    │     [IO0]   [RST]               │                     │
-│    │    BUTTON  BUTTON               │                     │
-│    │                                 │                     │
-│    │         ┌───────┐               │                     │
-│    │         │ MICRO │               │                     │
-│    │         │  USB  │               │  ← Connect USB here │
-│    │         └───────┘               │                     │
-│    │                                 │                     │
-│    └─────────────────────────────────┘                     │
+│    ┌─────────────────────────────────┐                      │
+│    │                                 │                      │
+│    │         ESP32-CAM               │                      │
+│    │      (plugs in here)            │                      │
+│    │           ↓ ↓ ↓                 │                      │
+│    │    ● ● ● ● ● ● ● ●              │                      │
+│    │    │ │ │ │ │ │ │ │              │                      │
+│    ├────┴─┴─┴─┴─┴─┴─┴─┴──────────────┤                      │
+│    │                                 │                      │
+│    │     [IO0]   [RST]               │                      │
+│    │    BUTTON  BUTTON               │                      │
+│    │                                 │                      │
+│    │         ┌───────┐               │                      │
+│    │         │ MICRO │               │                      │
+│    │         │  USB  │               │  ← Connect USB here  │
+│    │         └───────┘               │                      │
+│    │                                 │                      │ 
+│    └─────────────────────────────────┘                      │
 │                                                             │
 │  Steps:                                                     │
-│  1. Insert ESP32-CAM into MB board (camera facing up)      │
+│  1. Insert ESP32-CAM into MB board (camera facing up)       │
 │  2. Connect Micro-USB cable                                 │
 │  3. Select correct COM port in Arduino IDE                  │
 │                                                             │
